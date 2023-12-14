@@ -26,6 +26,12 @@ function check_status_service() {
     sudo systemctl status "$service_name"
 }
 
+function check_logs() {
+    local log_path="/var/lib/Acronis/BackupAndRecovery/MMS/mms.0.log"
+    echo "Last 10 lines of $log_path:"
+    tail -n 10 "$log_path"
+}
+
 function show_help() {
     echo "Usage: $0 [OPTIONS]"
     echo "Options:"
@@ -35,24 +41,20 @@ function show_help() {
     echo "  -c               Check status of services"
     echo "  -n <service>     Specify a particular service by name"
     echo "  -h, --help       Show this help message"
+    echo "  -l               Check logs"
     exit 0
 }
 
 # Parse command-line options
-while getopts ":srtcn:h-" opt; do
+while getopts ":srtcn:hl" opt; do
   case $opt in
     s) action="start" ;;
     r) action="restart" ;;
     t) action="stop" ;;
     c) action="check_status" ;;
     n) service_name="$OPTARG" ;;
+    l) action="check_logs" ;;
     h) show_help ;;
-    -) # Handle long options
-        case "${OPTARG}" in
-            help) show_help ;;
-            *) echo "Invalid option: --${OPTARG}" >&2
-               show_help ;;
-        esac;;
     \?) echo "Invalid option: -$OPTARG" >&2
         show_help ;;
   esac
@@ -66,6 +68,7 @@ if [ -n "$action" ]; then
             restart) restart_service "$service_name" ;;
             stop) stop_service "$service_name" ;;
             check_status) check_status_service "$service_name" ;;
+            check_logs) check_logs ;;
         esac
     else
         # If no service name is specified, perform the action on all services
@@ -77,8 +80,12 @@ if [ -n "$action" ]; then
                 check_status) check_status_service "$service" ;;
             esac
         done
+        # Display logs once after processing all services
+        if [ "$action" == "check_logs" ]; then
+            check_logs
+        fi
     fi
 else
-    echo "No action specified. Use -s, -r, -t, or -c."
+    echo "No action specified. Use -s, -r, -t, -c, -l, or -h for help."
     show_help
 fi
