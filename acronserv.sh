@@ -26,16 +26,35 @@ function check_status_service() {
     sudo systemctl status "$service_name"
 }
 
+function show_help() {
+    echo "Usage: $0 [OPTIONS]"
+    echo "Options:"
+    echo "  -s               Start services"
+    echo "  -r               Restart services"
+    echo "  -t               Stop services"
+    echo "  -c               Check status of services"
+    echo "  -n <service>     Specify a particular service by name"
+    echo "  -h, --help       Show this help message"
+    exit 0
+}
+
 # Parse command-line options
-while getopts ":srtcn:" opt; do
+while getopts ":srtcn:h-" opt; do
   case $opt in
     s) action="start" ;;
     r) action="restart" ;;
     t) action="stop" ;;
     c) action="check_status" ;;
     n) service_name="$OPTARG" ;;
+    h) show_help ;;
+    -) # Handle long options
+        case "${OPTARG}" in
+            help) show_help ;;
+            *) echo "Invalid option: --${OPTARG}" >&2
+               show_help ;;
+        esac;;
     \?) echo "Invalid option: -$OPTARG" >&2
-        exit 1 ;;
+        show_help ;;
   esac
 done
 
@@ -61,4 +80,5 @@ if [ -n "$action" ]; then
     fi
 else
     echo "No action specified. Use -s, -r, -t, or -c."
+    show_help
 fi
