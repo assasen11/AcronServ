@@ -7,3 +7,5 @@
 -c = check statuses 
 
 -n = define specific service
+
+-h or --help = help
