@@ -8,8 +8,9 @@
 
 -n = define specific service
 
--h or --help = help
+-h = help
 
+-l = check main logs
 
 
 git clone https://github.com/assasen11/AcronServ.git && cd AcronServ && chmod +x acronserv.sh
